@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+venv-*/
+
+# Training outputs (checkpoints, logs — can be very large)
+outputs/
+wandb/
+
+# Data files (download via scripts/01_download_data.py)
+data/*.jsonl
+data/benchmarks/
+
+# Unsloth / Triton cache
+unsloth_compiled_cache/
+.cache/
+
+# Large binaries
+*.run
+*.zip
+*.pt
+*.bin
+
+# Misc
+.DS_Store
+*.log
+*.swp

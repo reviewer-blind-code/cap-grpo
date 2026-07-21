@@ -13,6 +13,7 @@ Options:
     --skip-ood       skip OR-Library download
     --max-jobs N     SM filter: max number of jobs (default 10)
     --max-machines N SM filter: max number of machines (default 10)
+    --clear          delete existing data files before downloading
 """
 import argparse
 import sys
@@ -30,13 +31,20 @@ def main():
     parser.add_argument("--skip-ood",       action="store_true", help="Skip OR-Library download")
     parser.add_argument("--max-jobs",       type=int, default=10, help="SM filter: max jobs")
     parser.add_argument("--max-machines",   type=int, default=10, help="SM filter: max machines")
+    parser.add_argument("--clear",          action="store_true", help="Delete existing data files before downloading")
     args = parser.parse_args()
 
     raw_path = SM_TRAIN_FILE.parent / "starjob_raw.json"
 
+    if args.clear:
+        for p in [raw_path, SM_TRAIN_FILE, JOBSHOP1]:
+            if p.exists():
+                p.unlink()
+                print(f"[clear] Deleted {p}")
+
     if not args.skip_starjob:
         if raw_path.exists():
-            print(f"[skip] {raw_path} already exists. Use --skip-starjob to skip or delete to re-download.")
+            print(f"[skip] {raw_path} already exists. Use --clear to re-download.")
         else:
             download_starjob(output_path=raw_path)
 
@@ -54,7 +62,7 @@ def main():
 
     if not args.skip_ood:
         if JOBSHOP1.exists():
-            print(f"[skip] {JOBSHOP1} already exists. Delete to re-download.")
+            print(f"[skip] {JOBSHOP1} already exists. Use --clear to re-download.")
         else:
             download_ood(output_path=JOBSHOP1)
     else:

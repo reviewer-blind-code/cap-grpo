@@ -4,13 +4,33 @@ Fine-tune an LLM to solve the **Job-Shop Scheduling Problem (JSSP)** using
 **GRPO** (Shao et al., 2024), guided by a constraint-aware reward function
 (CAP) with a coverage gate that prevents reward hacking from vacuous outputs.
 
-## Results (LLaMA-3.1-8B, V6 CAP-GRPO)
+## Results (LLaMA-3.1-8B, CAP-GRPO hybrid reward)
 
-| Metric | CAP-GRPO V6 | o3-mini (zero-shot) |
-|--------|-------------|---------------------|
-| Feasible (18 OOD) | **8/18 (44%)** | 7/18 (39%) |
-| Mean gap to BKS | **+5.5%** | +182.7% |
+### FT+LA OOD (18 instances)
+
+| Metric | **CAP-GRPO (hybrid)** | o3-mini (zero-shot) |
+|--------|-----------------------|---------------------|
+| Feasible (18 OOD) | **13/18 (72%)** | 7/18 (39%) |
+| Mean gap to BKS† | **+11.3%** | +182.7% |
 | Cost | offline | $1.11 / run |
+
+† Gap computed on feasible instances only.
+
+### ORB benchmark (10 instances, 10×10, extended OOD)
+
+To probe generalisation beyond the 18 FT+LA instances, we additionally evaluate on the **ORB benchmark** (Applegate & Cook, 1991) — 10 instances all of size 10×10, structurally different from training data.
+
+| Metric | **CAP-GRPO (hybrid)** | SFT baseline |
+|--------|-----------------------|--------------|
+| Feasible (10 ORB) | **3/10 (30%)** | 2/10 (20%) |
+| Mean gap to BKS† | **+16.8%** | +21.5% |
+
+CAP-GRPO (hybrid) achieves the best **combined** OOD result across both benchmark sets:
+
+| Run | FT+LA 18 | ORB 10 | **Combined 28** |
+|-----|:--------:|:------:|:---------------:|
+| SFT baseline | 8/18 | 2/10 | 10/28 — 35.7% |
+| **CAP-GRPO (hybrid)** | **13/18** | **3/10** | **16/28 — 57.1%** |
 
 ---
 
@@ -236,6 +256,16 @@ python scripts/04_eval_ood.py --model-path ... --infer ft06
 | | | | | la19 | 10×10 | 842 |
 | | | | | la20 | 10×10 | 902 |
 
+**ORB instances (extended OOD — not used during training or validation):**
+
+| Instance | Size | BKS | | Instance | Size | BKS |
+|----------|------|-----|-|----------|------|-----|
+| orb01 | 10×10 | 1059 | | orb06 | 10×10 | 1010 |
+| orb02 | 10×10 | 888  | | orb07 | 10×10 | 397  |
+| orb03 | 10×10 | 1005 | | orb08 | 10×10 | 899  |
+| orb04 | 10×10 | 1005 | | orb09 | 10×10 | 934  |
+| orb05 | 10×10 | 887  | | orb10 | 10×10 | 944  |
+
 ---
 
 ## Repository Structure
@@ -341,6 +371,7 @@ r = compute_reward(v, n_ops=30, bks=55, mode="hybrid")
 | SM | StarJob (Abgaryan et al., 2025), filtered jobs≤10 × machines≤10 | ~108,000 | Training |
 | FT | Fisher & Thompson (1963) — ft06/ft10/ft20 | 3 | OOD eval |
 | LA | Lawrence (1984) — la01–la10, la16–la20 | 15 | OOD eval |
+| ORB | Applegate & Cook (1991) — orb01–orb10, all 10×10 | 10 | Extended OOD eval |
 
 The 2% test split (seed=42) is held out from **both** SFT and GRPO training.
 The 18 OOD FT+LA instances are never used for training.
@@ -354,6 +385,7 @@ The 18 OOD FT+LA instances are never used for training.
 - Grattafiori, A., et al. (2024). The Llama 3 Herd of Models. *arXiv preprint arXiv:2407.21783*.
 - Fisher, H., & Thompson, G. L. (1963). Probabilistic Learning Combinations of Local Job-Shop Scheduling Rules. *Industrial Scheduling*, 225–251.
 - Lawrence, S. (1984). *Resource Constrained Project Scheduling: An Experimental Investigation of Heuristic Scheduling Techniques*. Carnegie-Mellon University.
+- Applegate, D., & Cook, W. (1991). A Computational Study of the Job-Shop Scheduling Problem. *ORSA Journal on Computing*, 3(2), 149–156.
 
 ---
 

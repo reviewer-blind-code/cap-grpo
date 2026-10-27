@@ -34,6 +34,31 @@ CAP-GRPO (hybrid) achieves the best **combined** OOD result across both benchmar
 
 ---
 
+## Feasibility checker
+
+Every schedule is scored by `cap_grpo/checker.py`: six independent counters,
+and a schedule is feasible when all six are zero. The checker is audited
+against CP-SAT — it accepts every optimal schedule, reproduces its makespan,
+never accepts a schedule below a proven optimum, and rejects five kinds of
+injected defect.
+
+```bash
+python tests/test_checker.py            # 21 hand-built cases, one rule each
+python scripts/06_audit_checker.py      # CP-SAT round trip and mutations
+```
+
+| Test | Coverage | Result |
+|---|---|---|
+| CP-SAT optimal schedule accepted | 455 instances | 0 failures |
+| Makespan equals the CP-SAT objective | 455 instances | 0 mismatches |
+| Feasible schedule below the proven optimum | 25,025 generations | 0 |
+| Injected defects detected | 2,275 mutations | 0 missed |
+| Hand-built cases | 21 cases | 21 / 21 |
+
+`cap_grpo/checker_legacy.py` is the earlier implementation, kept for
+comparison: it agrees on 99.964 % of 25,025 stored generations, and the three
+rules that differ are described in [docs/CHECKER.md](docs/CHECKER.md).
+
 ## Pipeline Overview
 
 ```

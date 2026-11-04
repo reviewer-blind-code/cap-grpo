@@ -4,35 +4,86 @@ Fine-tune an LLM to solve the **Job-Shop Scheduling Problem (JSSP)** using
 **GRPO** (Shao et al., 2024), guided by a constraint-aware reward function
 (CAP) with a coverage gate that prevents reward hacking from vacuous outputs.
 
-## Results (LLaMA-3.1-8B, CAP-GRPO hybrid reward)
+## Results
 
-### FT+LA OOD (18 instances)
+Every figure below comes from one uniform evaluation grid: 11 models, 5
+decoding seeds, 455 instances, 25,025 generations, temperature 0.1, vLLM,
+scored with `cap_grpo/checker.py`. Earlier versions of this table reported
+single-run numbers on 18 instances; those are superseded.
 
-| Metric | **CAP-GRPO (hybrid)** | o3-mini (zero-shot) |
-|--------|-----------------------|---------------------|
-| Feasible (18 OOD) | **13/18 (72%)** | 7/18 (39%) |
-| Mean gap to BKS† | **+11.3%** | +182.7% |
-| Cost | offline | $1.11 / run |
+### Valid schedules over the whole grid
 
-† Gap computed on feasible instances only.
+| Model | Valid | Gain over its supervised start | Wins / losses | p |
+|---|---|---|---|---|
+| Hybrid plus over-emission penalty (V8) | **51.6 %** | +8.3 pp | 262 / 73 | 3.9e-26 |
+| Feasibility plus makespan (V2) | 51.4 % | +8.1 pp | 258 / 73 | 2.3e-25 |
+| Stratified, matched hyperparameters (V5) | 51.3 % | +8.0 pp | 258 / 75 | 1.2e-24 |
+| Hybrid, CAP-GRPO (V7) | 50.0 % | +6.7 pp | 230 / 78 | 1.5e-18 |
+| Feasibility plus penalty (V3) | 49.2 % | +5.9 pp | 211 / 76 | 7.4e-16 |
+| Feasibility only (V1) | 48.9 % | +5.6 pp | 205 / 77 | 1.4e-14 |
+| Stratified (V4) | 47.4 % | +4.1 pp | 192 / 99 | 5.4e-08 |
+| Stratified plus length mask (V6) | 45.5 % | +2.2 pp | 158 / 109 | 3.2e-03 |
+| Supervised fine-tuning, LoRA | 43.3 % | — | — | — |
+| Supervised fine-tuning, rsLoRA | 38.1 % | — | — | — |
+| No fine-tuning | 0.0 % | — | — | — |
 
-### ORB benchmark (10 instances, 10×10, extended OOD)
+Every RL variant starts from the same LoRA supervised checkpoint. The rsLoRA
+row is a second supervised baseline and is never used as an RL starting point.
+The test is a two-sided exact sign test on the pairs where exactly one model
+produced a valid schedule, equivalently the exact McNemar test.
 
-To probe generalisation beyond the 18 FT+LA instances, we additionally evaluate on the **ORB benchmark** (Applegate & Cook, 1991) — 10 instances all of size 10×10, structurally different from training data.
+### By benchmark family, valid % and mean gap
 
-| Metric | **CAP-GRPO (hybrid)** | SFT baseline |
-|--------|-----------------------|--------------|
-| Feasible (10 ORB) | **3/10 (30%)** | 2/10 (20%) |
-| Mean gap to BKS† | **+16.8%** | +21.5% |
+| Family | n | Supervised (LoRA) | CAP-GRPO (V7) | Over-emission (V8) |
+|---|---|---|---|---|
+| Classic literature | 35 | 25.7 % / 11.2 % | 39.4 % / 11.0 % | 38.3 % / 11.9 % |
+| Generated | 200 | 36.1 % / 8.5 % | 39.6 % / 6.7 % | 39.8 % / 7.3 % |
+| Learning to dispatch | 200 | 57.9 % / 9.6 % | 67.2 % / 9.5 % | 70.9 % / 9.9 % |
+| Long durations | 10 | 0 % | 0 % | 0 % |
+| Taillard | 10 | 0 % | 0 % | 0 % |
 
-CAP-GRPO (hybrid) achieves the best **combined** OOD result across both benchmark sets:
+### What the gain is, and is not
 
-| Run | FT+LA 18 | ORB 10 | **Combined 28** |
-|-----|:--------:|:------:|:---------------:|
-| SFT baseline | 8/18 | 2/10 | 10/28 — 35.7% |
-| **CAP-GRPO (hybrid)** | **13/18** | **3/10** | **16/28 — 57.1%** |
+- **Validity, not quality.** On the pairs where both models produce a valid
+  schedule, the median change in gap is 0.00 pp for every variant, and the mean
+  never moves more than 1.24 points either way.
+- **Sampling efficiency, mostly.** With 64 samples the supervised model reaches
+  100 % on known shapes too; one RL sample is worth three to four supervised
+  samples.
+- **No new capability.** Long durations and Taillard stay at zero for every
+  variant, every budget and every prompt.
+- **A reference point.** The MWKR dispatching rule reaches 11.9 % mean gap over
+  all 455 instances and never fails; the models reach 9.6 to 12.4 % on the 42
+  to 68 per cent of instances they answer at all.
 
----
+`docs/REPRODUCE.md` gives the command behind each of these numbers.
+
+## Raw data
+
+The generations are too large for git. They live in a separate folder, shared
+as a link in the review thread, with this layout:
+
+```
+JSSP-SLM-raw/
+  instances/        ood_455_main, ood_455_taillard, passk_90, scale_90, ta_probe_20
+  grid_uniform/     results.jsonl    25,025 generations, full text, 11 models x 5 seeds x 455
+  passk_k64/        samples.jsonl    57,600 samples, 10 models x 90 instances x 64
+  sm_heldout/       225 held-out StarJob instances and 9,000 generations
+  multiseed_1008/   13,350 generations behind the 8 October progress report
+  probes/           duration scaling, token budget, prompt sensitivity
+  frontier/         stored answers of the hosted models
+  training_logs/    per run: training.log, trainer_state.json, adapter_config.json
+  MANIFEST.md, SHA256SUMS
+```
+
+Point the scripts at it once:
+
+```bash
+export JSSP_RAW=/path/to/JSSP-SLM-raw
+python scripts/15_rl_effect.py
+```
+
+`docs/REPRODUCE.md` maps every reported number to the command that prints it.
 
 ## Feasibility checker
 

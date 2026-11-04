@@ -54,3 +54,21 @@ grad_norm and completion_length at every logging step, and
 runs the same file records the evaluation loss at 49 checkpoints and the
 selected checkpoint: step 9,800, evaluation loss 0.40401, the lowest of the
 run. No benchmark instance took part in that choice.
+
+## Stage 2, the uninformative-reward control
+
+`stage2_random/results.jsonl` holds 4,550 generations from the two control
+adapters, scored on the same grid as every other model. The control was
+launched from the rsLoRA supervised checkpoint rather than the LoRA one, so it
+is comparable with the rsLoRA baseline:
+
+| Model | Valid | Against its own start | Wins / losses | p |
+|---|---|---|---|---|
+| Supervised, rsLoRA | 38.1 % | — | — | — |
+| Uninformative reward, seed 42 | 33.4 % | −4.7 pp | 5 / 112 | 2.1e-27 |
+| Uninformative reward, seed 43 | 34.0 % | −4.1 pp | 8 / 101 | 1.3e-21 |
+
+A reward carrying no information about the schedule does not reproduce the
+gain; it costs four to five points, on both seeds, and loses twenty times more
+pairs than it wins. The eight informative rewards gain 2.2 to 8.3 points over
+their own start on the same grid.

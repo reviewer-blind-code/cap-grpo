@@ -35,16 +35,16 @@
   "target_modules": [
     "down_proj",
     "k_proj",
+    "up_proj",
     "q_proj",
-    "v_proj",
-    "o_proj",
     "gate_proj",
-    "up_proj"
+    "o_proj",
+    "v_proj"
   ],
   "target_parameters": null,
   "task_type": "CAUSAL_LM",
   "trainable_token_indices": null,
   "use_dora": false,
   "use_qalora": false,
-  "use_rslora": true
+  "use_rslora": false
 }

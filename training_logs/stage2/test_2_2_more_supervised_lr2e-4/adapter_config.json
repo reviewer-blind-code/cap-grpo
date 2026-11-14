@@ -33,12 +33,12 @@
   "rank_pattern": {},
   "revision": null,
   "target_modules": [
-    "down_proj",
-    "v_proj",
-    "k_proj",
     "q_proj",
-    "up_proj",
     "gate_proj",
+    "down_proj",
+    "k_proj",
+    "up_proj",
+    "v_proj",
     "o_proj"
   ],
   "target_parameters": null,
@@ -46,5 +46,5 @@
   "trainable_token_indices": null,
   "use_dora": false,
   "use_qalora": false,
-  "use_rslora": true
+  "use_rslora": false
 }

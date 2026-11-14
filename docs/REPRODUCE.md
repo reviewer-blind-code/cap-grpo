@@ -41,34 +41,56 @@ Model keys in the raw data map to the variant numbering as follows.
 ## What the raw data does and does not contain
 
 The grid stores the full text of all 25,025 answers, so every verdict there can
-be recomputed from scratch. The pass@k run stores the verdict, violation counts
-and token length of each of the 57,600 samples but not their text, which would
-have been about half a gigabyte; `scripts/07_passk.py` and `09_best_of_k.py`
-therefore read those verdicts rather than re-scoring text.
+be recomputed from scratch. The pass@k run as reported stores the verdict,
+violation counts and token length of each of the 57,600 samples but not their
+text; `scripts/07_passk.py` and `09_best_of_k.py` read those verdicts rather
+than re-scoring text. A repeat of the same experiment with the text kept sits
+beside it in `04_stage1_evaluation/passk/repeat_with_text/`; the README says
+how far the two agree.
 
 ## Training logs
 
+The training logs are in this repository, not in the raw-data folder, because
+they are small. They are named by the number used in the tables:
+`V1_feasibility_only` through `V8_hybrid_over_emission_penalty`, the two
+supervised runs, and `stage2/` for the control tests.
+
 `training_logs/<run>/trainer_state.json` holds reward, reward_std, KL, loss,
 grad_norm and completion_length at every logging step, and
-`training_logs/<run>/training.log` the full console output. For the supervised
+`training_logs/<run>/training.log` the full console output. One exception:
+`V3_feasibility_and_penalty` has `trainer_state_from_log.json` instead, rebuilt
+from its console log because that run's checkpoints were pruned when the
+results were imported. It carries the same 100 logged steps. For the supervised
 runs the same file records the evaluation loss at 49 checkpoints and the
 selected checkpoint: step 9,800, evaluation loss 0.40401, the lowest of the
 run. No benchmark instance took part in that choice.
 
-## Stage 2, the uninformative-reward control
+## Stage 2, the control tests
 
-`stage2_random/results.jsonl` holds 4,550 generations from the two control
-adapters, scored on the same grid as every other model. The control was
-launched from the rsLoRA supervised checkpoint rather than the LoRA one, so it
-is comparable with the rsLoRA baseline:
+`scripts/16_stage2_controls.py` recomputes every number in the Stage 2 section
+of the README from the raw folder:
 
-| Model | Valid | Against its own start | Wins / losses | p |
-|---|---|---|---|---|
-| Supervised, rsLoRA | 38.1 % | — | — | — |
-| Uninformative reward, seed 42 | 33.4 % | −4.7 pp | 5 / 112 | 2.1e-27 |
-| Uninformative reward, seed 43 | 34.0 % | −4.1 pp | 8 / 101 | 1.3e-21 |
+```bash
+python scripts/16_stage2_controls.py --data "$JSSP_RAW"
+```
 
-A reward carrying no information about the schedule does not reproduce the
-gain; it costs four to five points, on both seeds, and loses twenty times more
-pairs than it wins. The eight informative rewards gain 2.2 to 8.3 points over
-their own start on the same grid.
+It reads `05_stage2_tests/test_2_1_random_reward/generations.jsonl` and the two
+beside it, together with the main grid, and compares each control with the
+supervised checkpoint it started from, using the same exact sign test as step
+15.
+
+The three tests, and what each one removes:
+
+| Test | What is taken away | Result |
+|---|---|---|
+| 2-1 | the information in the reward | 29.7 % and 30.4 % valid, against 43.3 % at the start |
+| 2-2 | the reward and the sampling, leaving plain supervised training | 58.2 % at lr 5e-6 and 69.5 % at lr 2e-4 |
+| 2-3 | the policy gradient, leaving the checker as a data filter | 43.1 %, where it started |
+
+Each had the same supervised checkpoint, the same 2,000 records and the same
+500 optimizer updates as one RL run, and 2-3 drew the same 8,000 completions.
+
+`scripts/as_run/` holds the files that produced these runs on the GPU node,
+copied without change. They are written against the private training
+repository's module layout and will not run here; they are included because the
+exact code behind a number is part of the record.

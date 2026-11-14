@@ -6,15 +6,21 @@ at that folder, or reads the JSSP_RAW environment variable.
 
 Layout expected:
 
-    <data>/instances/ood_455_main.jsonl      445 instances
-    <data>/instances/ood_455_taillard.jsonl   10 instances
-    <data>/instances/passk_90.jsonl           90 instances
-    <data>/grid_uniform/results.jsonl         25,025 generations
-    <data>/passk_k64/samples.jsonl            57,600 samples
-    <data>/sm_heldout/…                       225 instances, 9,000 generations
-    <data>/multiseed_1008/generations.jsonl   the October 8 evaluation
-    <data>/probes/…                           scale, token budget, prompt
-    <data>/training_logs/<run>/…              reward, KL and loss per step
+    <data>/01_instances/ood_455_main.jsonl       445 instances
+    <data>/01_instances/ood_455_taillard.jsonl    10 instances
+    <data>/01_instances/passk_90.jsonl            90 instances
+    <data>/04_stage1_evaluation/main_grid/results.jsonl          25,025 generations
+    <data>/04_stage1_evaluation/passk/as_reported_verdicts_only/samples.jsonl
+    <data>/04_stage1_evaluation/passk/repeat_with_text/samples.jsonl
+    <data>/04_stage1_evaluation/sm_heldout/generations.jsonl      9,000 generations
+    <data>/04_stage1_evaluation/probes/…          scale, token budget, prompt
+    <data>/05_stage2_tests/test_2_1_random_reward/generations.jsonl
+    <data>/05_stage2_tests/test_2_2_more_supervised/generations.jsonl
+    <data>/05_stage2_tests/test_2_3_rejection_sampling/generations.jsonl
+    <data>/06_earlier_runs/multiseed_oct08/generations.jsonl      the October 8 evaluation
+
+The training logs are small enough for git and live in `training_logs/` in this
+repository, not in the raw-data folder.
 """
 import json
 import os
@@ -29,7 +35,10 @@ NAMES = {
     "V3": "Stratified reward, matched hyperparameters (V5)",
     "V6LoRA": "Stratified reward with length mask (V6)",
     "V4": "Hybrid reward, CAP-GRPO (V7)", "V7": "Hybrid with over-emission penalty (V8)",
-    "RANDs42": "Uninformative reward, seed 42", "RANDs43": "Uninformative reward, seed 43",
+    "RANDL42": "Uninformative reward, seed 42", "RANDL43": "Uninformative reward, seed 43",
+    "SFTbudget5e6": "More supervised training, lr 5e-6 (test 2-2)",
+    "SFTbudget2e4": "More supervised training, lr 2e-4 (test 2-2)",
+    "RFT": "Rejection-sampling fine-tuning (test 2-3)",
     # the pass@k run uses longer keys for the same adapters
     "Vbin-feasonly": "Feasibility-only reward (V1)",
     "VbinMk-feasmk": "Feasibility plus makespan (V2)",
@@ -60,10 +69,11 @@ def read_jsonl(path):
 
 def instances(root, which="ood"):
     """name -> instance record, with jobs as a list of (machine, duration)."""
-    files = {"ood": ["instances/ood_455_main.jsonl", "instances/ood_455_taillard.jsonl"],
-             "passk": ["instances/passk_90.jsonl"],
-             "scale": ["instances/scale_90.jsonl"],
-             "ta_probe": ["instances/ta_probe_20.jsonl"]}[which]
+    files = {"ood": ["01_instances/ood_455_main.jsonl",
+                     "01_instances/ood_455_taillard.jsonl"],
+             "passk": ["01_instances/passk_90.jsonl"],
+             "scale": ["01_instances/scale_90.jsonl"],
+             "ta_probe": ["01_instances/ta_probe_20.jsonl"]}[which]
     out = {}
     for f in files:
         for r in read_jsonl(root / f):
@@ -73,10 +83,14 @@ def instances(root, which="ood"):
 
 
 def generations(root, which="grid"):
-    f = {"grid": "grid_uniform/results.jsonl",
-         "passk": "passk_k64/samples.jsonl",
-         "sm": "sm_heldout/generations.jsonl",
-         "oct8": "multiseed_1008/generations.jsonl"}[which]
+    f = {"grid": "04_stage1_evaluation/main_grid/results.jsonl",
+         "passk": "04_stage1_evaluation/passk/as_reported_verdicts_only/samples.jsonl",
+         "passk_text": "04_stage1_evaluation/passk/repeat_with_text/samples.jsonl",
+         "sm": "04_stage1_evaluation/sm_heldout/generations.jsonl",
+         "oct8": "06_earlier_runs/multiseed_oct08/generations.jsonl",
+         "test_2_1": "05_stage2_tests/test_2_1_random_reward/generations.jsonl",
+         "test_2_2": "05_stage2_tests/test_2_2_more_supervised/generations.jsonl",
+         "test_2_3": "05_stage2_tests/test_2_3_rejection_sampling/generations.jsonl"}[which]
     return read_jsonl(root / f)
 
 

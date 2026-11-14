@@ -58,32 +58,100 @@ produced a valid schedule, equivalently the exact McNemar test.
 
 `docs/REPRODUCE.md` gives the command behind each of these numbers.
 
+## Stage 2: where the gain comes from
+
+The table above says the RL stage raises validity. It does not say why. Three
+controls each remove one possible cause, and each is given exactly what one RL
+run is given: the same supervised checkpoint, the same 2,000 records, 500
+optimizer updates, and where sampling is involved, the same 8,000 completions.
+
+| Model | Valid | Change | Wins / losses | p | Gap change on pairs both solve |
+|---|---|---|---|---|---|
+| More supervised training, lr 2e-4 (2-2) | **69.5 %** | +26.2 pp | 628 / 32 | 1.3e-144 | +0.06 pp |
+| More supervised training, lr 5e-6 (2-2) | **58.2 %** | +14.9 pp | 397 / 57 | 8.9e-64 | −0.52 pp |
+| Stratified, matched settings (V5) | 51.3 % | +8.0 pp | 258 / 75 | 1.2e-24 | **−1.12 pp** |
+| Hybrid, CAP-GRPO (V7) | 50.0 % | +6.7 pp | 230 / 78 | 1.5e-18 | **−1.24 pp** |
+| Supervised start | 43.3 % | — | — | — | — |
+| Rejection-sampling fine-tuning (2-3) | 43.1 % | −0.2 pp | 95 / 100 | 0.78 | +0.16 pp |
+| Uninformative reward, seed 42 (2-1) | 29.7 % | −13.6 pp | 19 / 328 | 6.8e-74 | +1.08 pp |
+| Uninformative reward, seed 43 (2-1) | 30.4 % | −12.9 pp | 61 / 355 | 1.6e-51 | +3.53 pp |
+
+Three things follow.
+
+- **The training loop alone does not do it.** With the reward replaced by a
+  random draw of the same mean and spread, validity falls by about thirteen
+  points. The reward has to read the schedule.
+- **The rise in validity is not what the reward designs achieve.** Plain
+  supervised training at the same budget raises it two to three times further.
+  It gets there by finishing the answer: the share cut off at the token limit
+  falls from 10.6 % to 2.9 %, and the share that finishes but breaks a rule
+  from 46.1 % to 27.6 %. The lr 2e-4 run matches the number of updates, not the
+  size of each step; the matched run is lr 5e-6, and it still gains +14.9 pp.
+- **What the reward does achieve is quality.** On the problems a pair of models
+  both solve, only the reward runs move the gap, by about one point. Neither
+  supervised control does, and neither does rejection sampling.
+
+Test 2-3 lands where it started because its filter had almost nothing to
+remove: 7,312 of its 8,000 samples were already valid.
+
+A fourth test, a stronger supervised stage and a second base model, has not
+been run.
+
+`python scripts/16_stage2_controls.py` recomputes every number in this table.
+
 ## Raw data
 
-The generations are too large for git. They live in a separate folder, shared
-as a link in the review thread, with this layout:
+The generations are too large for git. They live in a Google Drive folder,
+503 MB, 167 files:
+
+**https://drive.google.com/drive/folders/11bDSEA9ir1Pib3tmwzl87SV6ovgVbSrl**
 
 ```
 JSSP-SLM-raw/
-  instances/        ood_455_main, ood_455_taillard, passk_90, scale_90, ta_probe_20
-  grid_uniform/     results.jsonl    25,025 generations, full text, 11 models x 5 seeds x 455
-  passk_k64/        samples.jsonl    57,600 samples, 10 models x 90 instances x 64
-  sm_heldout/       225 held-out StarJob instances and 9,000 generations
-  multiseed_1008/   13,350 generations behind the 8 October progress report
-  probes/           duration scaling, token budget, prompt sensitivity
-  frontier/         stored answers of the hosted models
-  training_logs/    per run: training.log, trainer_state.json, adapter_config.json
-  MANIFEST.md, SHA256SUMS
+  00_README.md, 00_SHA256SUMS
+  01_instances/            every problem set, one JSON object per line
+  02_sft_stage/            how each base model was trained, and its console log
+  03_rl_stage/             the eight reward designs, training logs
+  04_stage1_evaluation/    one protocol for every model
+      main_grid/           25,025 answers, full text, 11 models x 5 seeds x 455
+      passk/               57,600 samples, twice: verdicts as reported, and a
+                           repeat that kept the text
+      sm_heldout/          9,000 answers on 225 held-out StarJob problems
+      probes/              duration scaling, token budget, prompt sensitivity
+      hosted_models/       stored answers of the hosted models
+  05_stage2_tests/         one folder per control test, logs next to answers
+  06_earlier_runs/         earlier evaluation output, kept for the record
 ```
 
-Point the scripts at it once:
+The training logs are small, so they are in this repository under
+`training_logs/`, named by the number used in the tables: `V1_feasibility_only`
+through `V8_hybrid_over_emission_penalty`, plus the supervised runs and the
+Stage 2 controls. Each holds `trainer_state.json` with reward, reward_std, KL,
+loss, gradient norm, completion length and learning rate at every logging step.
+
+Point the scripts at the raw folder once:
 
 ```bash
 export JSSP_RAW=/path/to/JSSP-SLM-raw
 python scripts/15_rl_effect.py
+python scripts/16_stage2_controls.py
 ```
 
 `docs/REPRODUCE.md` maps every reported number to the command that prints it.
+
+### A note on pass@k
+
+`04_stage1_evaluation/passk/` holds two files for the same experiment.
+`as_reported_verdicts_only/` is the run the reported numbers come from; only
+the verdicts were stored. `repeat_with_text/` is the same experiment run again
+with the same problems, the same k, the same temperature and the same seed,
+keeping the text, so the checker can be run again on the schedules themselves.
+
+The two are not sample for sample identical: vLLM sampling with a LoRA adapter
+is not reproducible bit for bit between runs. 95.8 % of the 57,600 verdicts
+agree and the pass@k curves agree within 0.1 to 2.2 points, where one problem
+out of 90 is worth 1.1 points. Both files are kept so that neither claim has to
+be taken on trust.
 
 ## Feasibility checker
 

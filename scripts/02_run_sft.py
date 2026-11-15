@@ -21,7 +21,7 @@ Options:
     --grad-accum    gradient accumulation steps (default: 8)
     --max-records   limit number of training records (default: all)
     --lora-r        LoRA rank (default: 32)
-    --no-rslora     disable rsLoRA (rsLoRA is on by default)
+    --rslora        enable rank-stabilised scaling (off by default)
     --resume-from   checkpoint directory to resume from
 """
 import argparse
@@ -57,7 +57,7 @@ def main():
     parser.add_argument("--max-records", type=int,   default=None,
                         help="Limit training records (default: full 98%% SM train)")
     parser.add_argument("--lora-r",      type=int,   default=SFT_LORA_R)
-    parser.add_argument("--no-rslora",   action="store_true")
+    parser.add_argument("--rslora",      action="store_true")
     parser.add_argument("--resume-from", default=None, metavar="CKPT_DIR")
     parser.add_argument("--dtype",       choices=["bfloat16", "float16"], default="bfloat16")
     args = parser.parse_args()
@@ -76,7 +76,7 @@ def main():
     model = attach_lora(
         model,
         r=args.lora_r,
-        use_rslora=not args.no_rslora,
+        use_rslora=args.rslora,
     )
 
     records = load_starjob_sm(split="train", limit=args.max_records)

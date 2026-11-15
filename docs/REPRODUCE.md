@@ -28,7 +28,6 @@ Model keys in the raw data map to the variant numbering as follows.
 |---|---|---|
 | `Base-LLaMA` | — | no fine-tuning |
 | `SFT-LoRA` | — | supervised, LoRA; the start of every RL run |
-| `SFT-rsLoRA` | — | supervised, rsLoRA; a second baseline, never an RL start |
 | `Vbin` | V1 | feasibility only |
 | `VbinMk` | V2 | feasibility plus makespan |
 | `StratNoMk` | V3 | feasibility plus constraint penalty |

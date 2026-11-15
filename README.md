@@ -72,12 +72,10 @@ single-run numbers on 18 instances; those are superseded.
 | Stratified (V4) | 47.4 % | +4.1 pp | 192 / 99 | 5.4e-08 |
 | Stratified plus length mask (V6) | 45.5 % | +2.2 pp | 158 / 109 | 3.2e-03 |
 | Supervised fine-tuning, LoRA | 43.3 % | — | — | — |
-| Supervised fine-tuning, rsLoRA | 38.1 % | — | — | — |
 | No fine-tuning | 0.0 % | — | — | — |
 
-Every RL variant starts from the same LoRA supervised checkpoint. The rsLoRA
-row is a second supervised baseline and is never used as an RL starting point.
-The test is a two-sided exact sign test on the pairs where exactly one model
+Every RL variant starts from the same LoRA supervised checkpoint. The test is
+a two-sided exact sign test on the pairs where exactly one model
 produced a valid schedule, equivalently the exact McNemar test.
 
 ### By benchmark family, valid % and mean gap
@@ -299,8 +297,10 @@ data/
 ## Step 2 — Supervised Fine-Tuning (SFT)
 
 SFT teaches the model the JSSP output format before RL begins, which
-dramatically improves GRPO convergence speed and stability. We use LoRA
-(Hu et al., 2021) with rank-stabilised scaling (rsLoRA; Kalajdzievski, 2023).
+dramatically improves GRPO convergence speed and stability. It uses LoRA
+(Hu et al., 2021). Rank-stabilised scaling (rsLoRA; Kalajdzievski, 2023) was
+tried early on and is still available behind `--rslora`, but every result in
+this repository comes from plain LoRA.
 
 ```bash
 # Train LLaMA-3.1-8B (recommended)
@@ -326,7 +326,7 @@ python scripts/02_run_sft.py --model-path /path/to/local/llama
 |-----------|---------|-------|
 | LoRA rank | 32 | `--lora-r` |
 | LoRA alpha | 32 | matches rank |
-| rsLoRA | enabled | rank-stabilised scaling |
+| rsLoRA | off | `--rslora` turns on rank-stabilised scaling |
 | Learning rate | 2e-4 | `--lr` |
 | Epochs | 1 | `--epochs` |
 | Batch size | 1 | `--batch-size` |

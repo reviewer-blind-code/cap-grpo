@@ -59,12 +59,13 @@ V4 and V5 use the same reward and differ only in the training settings. V6 adds
 a mask that drops over-long samples from the gradient, V8 a penalty for writing
 the same job too many times.
 
-Training logs for all eight are in `training_logs/`, named by these numbers.
-Inside each log the reward is still called by its mode name in the code, which
-is not the variant number: V1's log says `jssp_reward_uniform`, and V8's says
-`jssp_reward_hybrid_v7`, where the `v7` is that reward's old label and not
-variant V7. `docs/REPRODUCE.md` carries the full mapping between the three
-names each run has.
+Training logs for all eight are in `training_logs/`, named by these numbers,
+and every file inside calls the run by the same number. The names the files
+were produced under are kept beside the new ones, `model_as_run` in the
+generations and `reward_mode_as_run` in the logs, and `docs/REPRODUCE.md` maps
+the two. That mapping is worth a look before reading a raw file by hand: the
+old keys predate this numbering, so a file produced then calls variant V4
+"V1".
 
 ## Stage 1: the audit
 

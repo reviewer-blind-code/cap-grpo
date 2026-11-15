@@ -27,28 +27,25 @@ import os
 from pathlib import Path
 
 NAMES = {
-    "Base-LLaMA": "No fine-tuning", "Base": "No fine-tuning",
+    "Base": "No fine-tuning",
     "SFT-LoRA": "Supervised fine-tuning (LoRA)",
     "SFT-rsLoRA": "Supervised fine-tuning (rsLoRA)",
-    "Vbin": "Feasibility-only reward (V1)", "VbinMk": "Feasibility plus makespan (V2)",
-    "StratNoMk": "Feasibility plus penalty (V3)", "V1": "Stratified reward (V4)",
-    "V3": "Stratified reward, matched hyperparameters (V5)",
-    "V6LoRA": "Stratified reward with length mask (V6)",
-    "V4": "Hybrid reward, CAP-GRPO (V7)", "V7": "Hybrid with over-emission penalty (V8)",
-    "RANDL42": "Uninformative reward, seed 42", "RANDL43": "Uninformative reward, seed 43",
-    "SFTbudget5e6": "More supervised training, lr 5e-6 (test 2-2)",
-    "SFTbudget2e4": "More supervised training, lr 2e-4 (test 2-2)",
-    "RFT": "Rejection-sampling fine-tuning (test 2-3)",
-    # the pass@k run uses longer keys for the same adapters
-    "Vbin-feasonly": "Feasibility-only reward (V1)",
-    "VbinMk-feasmk": "Feasibility plus makespan (V2)",
-    "StratNoMk-feaspen": "Feasibility plus penalty (V3)",
-    "V1-stratified": "Stratified reward (V4)",
-    "V3-stratified": "Stratified reward, matched hyperparameters (V5)",
-    "V6LoRA-lenmask": "Stratified reward with length mask (V6)",
-    "V4-hybrid": "Hybrid reward, CAP-GRPO (V7)",
-    "V7-hybridover": "Hybrid with over-emission penalty (V8)",
+    "V1": "Feasibility-only reward (V1)",
+    "V2": "Feasibility plus makespan (V2)",
+    "V3": "Feasibility plus penalty (V3)",
+    "V4": "Stratified reward (V4)",
+    "V5": "Stratified reward, matched settings (V5)",
+    "V6": "Stratified reward with length mask (V6)",
+    "V7": "Hybrid reward, CAP-GRPO (V7)",
+    "V8": "Hybrid with over-emission penalty (V8)",
+    "T2-1-seed42": "Random reward, seed 42 (test 2-1)",
+    "T2-1-seed43": "Random reward, seed 43 (test 2-1)",
+    "T2-2-lr5e-6": "More supervised training, lr 5e-6 (test 2-2)",
+    "T2-2-lr2e-4": "More supervised training, lr 2e-4 (test 2-2)",
+    "T2-3": "Rejection-sampling fine-tuning (test 2-3)",
 }
+# Every raw record also carries `model_as_run`, the key the file was produced
+# under; docs/REPRODUCE.md maps the two.
 BASELINE = "SFT-LoRA"
 
 

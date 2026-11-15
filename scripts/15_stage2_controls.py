@@ -99,9 +99,8 @@ def main():
     idx = index(rows)
     models = sorted({k[0] for k in idx})
 
-    controls = [m for m in models if m in
-                ("RANDL42", "RANDL43", "SFTbudget5e6", "SFTbudget2e4", "RFT")]
-    reference = [m for m in (BASELINE, "V3", "V4") if m in models]
+    controls = [m for m in models if m.startswith("T2-")]
+    reference = [m for m in (BASELINE, "V5", "V7") if m in models]
 
     out = {"baseline": BASELINE,
            "summary": [summarise(idx, m) for m in reference + controls],

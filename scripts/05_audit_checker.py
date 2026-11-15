@@ -1,4 +1,4 @@
-"""Step 6 — Audit the feasibility checker against CP-SAT.
+"""Step 5 — Audit the feasibility checker against CP-SAT.
 
 Three tests per instance, none of which involves a language model:
 
@@ -14,9 +14,9 @@ one, overlap two operations on a machine, and move one operation to the wrong
 machine.
 
 Run:
-    python scripts/06_audit_checker.py                      # FT+LA, 18 instances
-    python scripts/06_audit_checker.py --limit 30           # 30 s per instance
-    python scripts/06_audit_checker.py --out results/audit.json
+    python scripts/05_audit_checker.py                      # FT+LA, 18 instances
+    python scripts/05_audit_checker.py --limit 30           # 30 s per instance
+    python scripts/05_audit_checker.py --out results/audit.json
 
 Requires ortools:  pip install ortools
 """

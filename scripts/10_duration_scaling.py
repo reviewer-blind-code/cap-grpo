@@ -1,4 +1,4 @@
-"""Step 11 — duration scaling.
+"""Step 10 — duration scaling.
 
 Multiplying every processing time by a constant leaves the optimal order
 unchanged and scales the optimum by the same factor, so anything that changes
@@ -6,7 +6,7 @@ is about handling the numbers rather than about scheduling. The long-duration
 instances are also divided by ten, with the optimum recomputed.
 
 Run:
-    python scripts/11_duration_scaling.py --data /path/to/raw
+    python scripts/10_duration_scaling.py --data /path/to/raw
 """
 import argparse
 import statistics as st

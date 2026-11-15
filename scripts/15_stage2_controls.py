@@ -1,4 +1,4 @@
-"""Step 16 — the Stage 2 control tests.
+"""Step 15 — the Stage 2 control tests.
 
 Stage 1 showed that the RL stage raises how often the model writes a valid
 schedule. It did not show why. Three controls each remove one possible cause,
@@ -14,12 +14,12 @@ one that samples, the same 8,000 completions.
               8,000 samples drawn, the valid ones kept, then trained on
 
 Each control is compared with the checkpoint it started from on the same
-instance and the same seed, with the two-sided exact sign test used in step 15.
+instance and the same seed, with the two-sided exact sign test used in step 14.
 Pairs where both models are valid carry the quality comparison.
 
 Run:
-    python scripts/16_stage2_controls.py --data /path/to/raw
-    python scripts/16_stage2_controls.py --data /path/to/raw --json out.json
+    python scripts/15_stage2_controls.py --data /path/to/raw
+    python scripts/15_stage2_controls.py --data /path/to/raw --json out.json
 """
 import argparse
 import json

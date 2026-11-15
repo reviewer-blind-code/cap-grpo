@@ -1,4 +1,4 @@
-"""Step 15 — the paired effect of the RL stage over its supervised start.
+"""Step 14 — the paired effect of the RL stage over its supervised start.
 
 Every RL run is compared with SFT-LoRA on the same instance and the same seed.
 Pairs where exactly one model produced a valid schedule are the decisive ones;
@@ -13,8 +13,8 @@ gap, reported as mean, median and deciles, because the mean alone is carried by
 a minority of large changes.
 
 Run:
-    python scripts/15_rl_effect.py --data /path/to/raw
-    python scripts/15_rl_effect.py --data /path/to/raw --json out.json
+    python scripts/14_rl_effect.py --data /path/to/raw
+    python scripts/14_rl_effect.py --data /path/to/raw --json out.json
 """
 import argparse
 import json

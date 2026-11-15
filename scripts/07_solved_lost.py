@@ -1,4 +1,4 @@
-"""Step 8 — which instances each model solves, and which it loses.
+"""Step 7 — which instances each model solves, and which it loses.
 
 An instance counts as solved by a model when at least one of its samples is a
 valid schedule. Every RL variant is then compared with SFT-LoRA instance by
@@ -10,7 +10,7 @@ separately because known shapes are solved by everyone and long durations by
 no one.
 
 Run:
-    python scripts/08_solved_lost.py --data /path/to/raw
+    python scripts/07_solved_lost.py --data /path/to/raw
 """
 import argparse
 import json

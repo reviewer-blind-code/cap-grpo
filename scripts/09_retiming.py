@@ -1,4 +1,4 @@
-"""Step 10 — re-timing diagnostic.
+"""Step 9 — re-timing diagnostic.
 
 Keep the ordering the model chose, discard its start and end times, recompute
 them so each operation starts when its job and its machine are both free, and
@@ -7,7 +7,7 @@ wrong, or the ordering contradicts the routes. If feasibility jumps, the
 bottleneck was arithmetic; it does not jump.
 
 Run:
-    python scripts/10_retiming.py --data /path/to/raw
+    python scripts/09_retiming.py --data /path/to/raw
 """
 import argparse
 import csv

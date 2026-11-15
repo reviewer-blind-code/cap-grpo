@@ -1,4 +1,4 @@
-"""Step 14 — why the hosted models fail.
+"""Step 13 — why the hosted models fail.
 
 "0 of 18 feasible" does not say whether the model wrote nothing usable, ran out
 of tokens, or produced a complete schedule that breaks a constraint. Every
@@ -10,7 +10,7 @@ stored answer is re-scored with this repository's checker and classified:
     truncated     the answer reached the token limit
 
 Run:
-    python scripts/14_frontier_failures.py --data /path/to/raw
+    python scripts/13_frontier_failures.py --data /path/to/raw
 """
 import argparse
 import json

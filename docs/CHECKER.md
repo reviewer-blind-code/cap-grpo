@@ -27,7 +27,7 @@ steps rather than silently dropped.
 
 ```bash
 python tests/test_checker.py            # 21 hand-built cases, one rule each
-python scripts/06_audit_checker.py      # CP-SAT round trip and five mutation types
+python scripts/05_audit_checker.py      # CP-SAT round trip and five mutation types
 ```
 
 The audit needs `ortools`; everything else in the checker is dependency-free.

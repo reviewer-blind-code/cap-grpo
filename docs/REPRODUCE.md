@@ -11,16 +11,16 @@ export JSSP_RAW=/path/to/JSSP-SLM-raw     # or pass --data to each script
 
 | Report item | Command | Key figures it prints |
 |---|---|---|
-| Checker audit | `python scripts/06_audit_checker.py` | 455 of 455 round trips clean, 2,275 mutations caught, 0 schedules below a proven optimum |
-| RL effect, validity and quality | `python scripts/15_rl_effect.py` | 43.3 to 51.6 % for V8, W/L 262/73, p 3.9e-26, median gap change 0.00 pp |
-| pass@k by region and quality | `python scripts/07_passk.py` | known shapes 77.6 to 100 % for SFT, within 10 % 72.5 against 95.0 % at k=64 |
-| Solved and lost sets | `python scripts/08_solved_lost.py` | grid: 48 to 73 gained against 9 to 25 lost; pass@k: RL-only 0 to 4, all on new shapes |
-| Best of K at equal cost | `python scripts/09_best_of_k.py` | known k=64 gap 5.0 against 3.5 %; supervised needs k=3 to match one RL sample |
-| Re-timing diagnostic | `python scripts/10_retiming.py` | repair recovers 0.4 to 3.4 points; 45 to 62 % of answers have the wrong operation set |
-| Duration scaling | `python scripts/11_duration_scaling.py` | x1 41.2 % falls to 11.9 % at x10; long durations 0 to 45.0 % when divided by ten |
-| Gap distribution, RL-only instances | `python scripts/12_gap_distribution.py --model V4` | 8.1 against 13.2 % mean gap; size-matched at 100 operations 14.2 against 15.6 % |
-| Dispatching-rule reference | `python scripts/13_dispatching_rules.py` | MWKR 11.9 % over all 455 and never fails; models 9.6 to 12.4 % on 42 to 68 % of instances |
-| Hosted-model failures | `python scripts/14_frontier_failures.py` | GPT-4o 0 of 18, all constraint violations; o3 one-shot 12 of 18, the rest truncation |
+| Checker audit | `python scripts/05_audit_checker.py` | 455 of 455 round trips clean, 2,275 mutations caught, 0 schedules below a proven optimum |
+| RL effect, validity and quality | `python scripts/14_rl_effect.py` | 43.3 to 51.6 % for V8, W/L 262/73, p 3.9e-26, median gap change 0.00 pp |
+| pass@k by region and quality | `python scripts/06_passk.py` | known shapes 77.6 to 100 % for SFT, within 10 % 72.5 against 95.0 % at k=64 |
+| Solved and lost sets | `python scripts/07_solved_lost.py` | grid: 48 to 73 gained against 9 to 25 lost; pass@k: RL-only 0 to 4, all on new shapes |
+| Best of K at equal cost | `python scripts/08_best_of_k.py` | known k=64 gap 5.0 against 3.5 %; supervised needs k=3 to match one RL sample |
+| Re-timing diagnostic | `python scripts/09_retiming.py` | repair recovers 0.4 to 3.4 points; 45 to 62 % of answers have the wrong operation set |
+| Duration scaling | `python scripts/10_duration_scaling.py` | x1 41.2 % falls to 11.9 % at x10; long durations 0 to 45.0 % when divided by ten |
+| Gap distribution, RL-only instances | `python scripts/11_gap_distribution.py --model V4` | 8.1 against 13.2 % mean gap; size-matched at 100 operations 14.2 against 15.6 % |
+| Dispatching-rule reference | `python scripts/12_dispatching_rules.py` | MWKR 11.9 % over all 455 and never fails; models 9.6 to 12.4 % on 42 to 68 % of instances |
+| Hosted-model failures | `python scripts/13_frontier_failures.py` | GPT-4o 0 of 18, all constraint violations; o3 one-shot 12 of 18, the rest truncation |
 
 Model keys in the raw data map to the variant numbering as follows.
 
@@ -42,7 +42,7 @@ Model keys in the raw data map to the variant numbering as follows.
 The grid stores the full text of all 25,025 answers, so every verdict there can
 be recomputed from scratch. The pass@k run as reported stores the verdict,
 violation counts and token length of each of the 57,600 samples but not their
-text; `scripts/07_passk.py` and `09_best_of_k.py` read those verdicts rather
+text; `scripts/06_passk.py` and `08_best_of_k.py` read those verdicts rather
 than re-scoring text. A repeat of the same experiment with the text kept sits
 beside it in `04_stage1_evaluation/passk/repeat_with_text/`; the README says
 how far the two agree.
@@ -66,11 +66,11 @@ run. No benchmark instance took part in that choice.
 
 ## Stage 2, the control tests
 
-`scripts/16_stage2_controls.py` recomputes every number in the Stage 2 section
+`scripts/15_stage2_controls.py` recomputes every number in the Stage 2 section
 of the README from the raw folder:
 
 ```bash
-python scripts/16_stage2_controls.py --data "$JSSP_RAW"
+python scripts/15_stage2_controls.py --data "$JSSP_RAW"
 ```
 
 It reads `05_stage2_tests/test_2_1_random_reward/generations.jsonl` and the two

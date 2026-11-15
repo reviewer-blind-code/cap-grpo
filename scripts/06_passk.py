@@ -1,4 +1,4 @@
-"""Step 7 — pass@k by region and by quality.
+"""Step 6 — pass@k by region and by quality.
 
 For each model, instance group and budget k, the unbiased estimator
 
@@ -9,8 +9,8 @@ Three outcomes are reported: a valid schedule, a valid schedule within ten per
 cent of the reference, and neither.
 
 Run:
-    python scripts/07_passk.py --data /path/to/raw
-    python scripts/07_passk.py --data /path/to/raw --csv passk_curves.csv
+    python scripts/06_passk.py --data /path/to/raw
+    python scripts/06_passk.py --data /path/to/raw --csv passk_curves.csv
 """
 import argparse
 import csv

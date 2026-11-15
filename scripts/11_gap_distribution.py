@@ -1,11 +1,11 @@
-"""Step 12 — gap distribution on the instances only RL solves.
+"""Step 11 — gap distribution on the instances only RL solves.
 
 Was feasibility bought with quality? The gap of every valid schedule is split
 by whether the supervised model also solves that instance, and then split again
 by instance size, because the instances only RL solves are the larger ones.
 
 Run:
-    python scripts/12_gap_distribution.py --data /path/to/raw --model V4
+    python scripts/11_gap_distribution.py --data /path/to/raw --model V4
 """
 import argparse
 import statistics as st

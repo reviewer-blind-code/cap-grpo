@@ -6,8 +6,8 @@ at that folder, or reads the JSSP_RAW environment variable.
 
 Layout expected:
 
-    <data>/01_instances/ood_455_main.jsonl       445 instances
-    <data>/01_instances/ood_455_taillard.jsonl    10 instances
+    <data>/01_instances/ood_main_445.jsonl       445 instances
+    <data>/01_instances/ood_taillard_10.jsonl    10 instances
     <data>/01_instances/passk_90.jsonl            90 instances
     <data>/04_stage1_evaluation/main_grid/results.jsonl          25,025 generations
     <data>/04_stage1_evaluation/passk/as_reported_verdicts_only/samples.jsonl
@@ -69,8 +69,8 @@ def read_jsonl(path):
 
 def instances(root, which="ood"):
     """name -> instance record, with jobs as a list of (machine, duration)."""
-    files = {"ood": ["01_instances/ood_455_main.jsonl",
-                     "01_instances/ood_455_taillard.jsonl"],
+    files = {"ood": ["01_instances/ood_main_445.jsonl",
+                     "01_instances/ood_taillard_10.jsonl"],
              "passk": ["01_instances/passk_90.jsonl"],
              "scale": ["01_instances/scale_90.jsonl"],
              "ta_probe": ["01_instances/ta_probe_20.jsonl"]}[which]

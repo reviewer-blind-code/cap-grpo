@@ -1,4 +1,4 @@
-"""Step 9 — best of K at equal inference cost.
+"""Step 8 — best of K at equal inference cost.
 
 Draw k of the 64 stored samples, keep the valid schedule with the smallest
 makespan, and report two things: how often an instance is solved at all, and
@@ -9,7 +9,7 @@ The supervised budget that matches one RL sample is searched over every k from
 1 to 64, not only the budgets printed.
 
 Run:
-    python scripts/09_best_of_k.py --data /path/to/raw --trials 2000
+    python scripts/08_best_of_k.py --data /path/to/raw --trials 2000
 """
 import argparse
 import csv

@@ -35,7 +35,7 @@ README, the same LLaMA model reaches **43.3 %**.
 
 The checkpoint carried forward is step 9,800, chosen as the lowest evaluation
 loss of the run, 0.40401, measured on the corpus's own split. No benchmark
-instance took part in that choice. `training_logs/sft_llama_lora_checkpoint9800/`
+instance took part in that choice. `training_logs/sft_llama_lora/`
 holds the evaluation loss at all 49 checkpoints.
 
 ## The RL stage
@@ -83,8 +83,10 @@ single-run numbers on 18 instances; those are superseded.
 | Supervised fine-tuning, LoRA | 43.3 % | — | — | — |
 | No fine-tuning | 0.0 % | — | — | — |
 
-Every RL variant starts from the same LoRA supervised checkpoint. The test is
-a two-sided exact sign test on the pairs where exactly one model
+Every RL variant starts from the same LoRA supervised checkpoint. The grid also
+holds an rsLoRA supervised baseline, 38.1 % valid, which `14_rl_effect.py` will
+print; it is a leftover from an earlier comparison and nothing in this work uses
+it. The test is a two-sided exact sign test on the pairs where exactly one model
 produced a valid schedule, equivalently the exact McNemar test.
 
 ### By benchmark family, valid % and mean gap
@@ -161,7 +163,7 @@ three controls does.
 A fourth test, a stronger supervised stage and a second base model, has not
 been run.
 
-`python scripts/16_stage2_controls.py` recomputes every number in this table,
+`python scripts/15_stage2_controls.py` recomputes every number in this table,
 and the raw folder keeps one directory per test under `05_stage2_tests/`.
 
 ## Raw data
@@ -198,8 +200,8 @@ Point the scripts at the raw folder once:
 
 ```bash
 export JSSP_RAW=/path/to/JSSP-SLM-raw
-python scripts/15_rl_effect.py
-python scripts/16_stage2_controls.py
+python scripts/14_rl_effect.py
+python scripts/15_stage2_controls.py
 ```
 
 `docs/REPRODUCE.md` maps every reported number to the command that prints it.
@@ -228,7 +230,7 @@ injected defect.
 
 ```bash
 python tests/test_checker.py            # 21 hand-built cases, one rule each
-python scripts/06_audit_checker.py      # CP-SAT round trip and mutations
+python scripts/05_audit_checker.py      # CP-SAT round trip and mutations
 ```
 
 | Test | Coverage | Result |
@@ -257,17 +259,17 @@ Training, in four steps:
 Analysis, reading the raw-data folder rather than running a model:
 
 ```
-06_audit_checker.py       the checker against CP-SAT, and against mutations
-07_passk.py               pass@k from the stored samples
-08_solved_lost.py         which instances each model gains and loses
-09_best_of_k.py           best of k at equal inference cost
-10_retiming.py            how many invalid schedules a repair pass can save
-11_duration_scaling.py    what happens when durations are divided by ten
-12_gap_distribution.py    the gap distribution, not just its mean
-13_dispatching_rules.py   FIFO, SPT, LPT, MWKR and LWKR as a reference point
-14_frontier_failures.py   why the hosted models fail, counted by cause
-15_rl_effect.py           the paired effect of the RL stage over its SFT start
-16_stage2_controls.py     the three Stage 2 control tests
+05_audit_checker.py       the checker against CP-SAT, and against mutations
+06_passk.py               pass@k from the stored samples
+07_solved_lost.py         which instances each model gains and loses
+08_best_of_k.py           best of k at equal inference cost
+09_retiming.py            how many invalid schedules a repair pass can save
+10_duration_scaling.py    what happens when durations are divided by ten
+11_gap_distribution.py    the gap distribution, not just its mean
+12_dispatching_rules.py   FIFO, SPT, LPT, MWKR and LWKR as a reference point
+13_frontier_failures.py   why the hosted models fail, counted by cause
+14_rl_effect.py           the paired effect of the RL stage over its SFT start
+15_stage2_controls.py     the three Stage 2 control tests
 as_run/                   the files that produced the runs on the GPU node
 ```
 
@@ -453,7 +455,7 @@ constraint checks (observed in early V2/V3 runs).
 is still training. It is **not** the evaluation the results in this README come
 from: those use the uniform grid of 455 instances and 5 seeds described in
 [Stage 1](#stage-1-the-audit), produced by `scripts/as_run/run_grid.py` and
-analysed by `scripts/15_rl_effect.py` and `scripts/16_stage2_controls.py`.
+analysed by `scripts/14_rl_effect.py` and `scripts/15_stage2_controls.py`.
 
 ```bash
 # OOD benchmarks (all 18 FT+LA instances)
@@ -517,7 +519,7 @@ cap-grpo/
 │   ├── 02_run_sft.py               step 2: supervised fine-tuning
 │   ├── 03_run_grpo.py              step 3: CAP-GRPO reinforcement learning
 │   ├── 04_eval_ood.py              step 4: quick check on 18 instances
-│   ├── 06_audit_checker.py … 16_stage2_controls.py
+│   ├── 05_audit_checker.py … 15_stage2_controls.py
 │   │                               analysis, reading the raw-data folder
 │   └── as_run/                     the files as they ran on the GPU node
 │
@@ -542,12 +544,20 @@ cap-grpo/
 │
 ├── training_logs/                  ← small enough for git
 │   ├── V1_feasibility_only/ … V8_hybrid_over_emission_penalty/
-│   ├── sft_llama_lora_checkpoint9800/   evaluation loss at 49 checkpoints
+│   ├── sft_llama_lora/             evaluation loss at 49 checkpoints
 │   ├── sft_llama_rslora/
-│   └── stage2/                     the five control runs
+│   └── stage2/
+│       ├── test_2_1_random_reward/        seed42/, seed43/
+│       ├── test_2_2_more_supervised/      lr5e-6/, lr2e-4/
+│       └── test_2_3_rejection_sampling/   run/
 │
 ├── data/
 │   ├── instances/                  the problem sets, small enough for git
+│   │   ├── ood_main_445.jsonl      the benchmark grid, 445 problems
+│   │   ├── ood_taillard_10.jsonl   the 10 Taillard problems in the grid
+│   │   ├── passk_90.jsonl          the 90 problems used for pass@k
+│   │   ├── scale_90.jsonl          the duration-scaling probe
+│   │   └── ta_probe_20.jsonl       the Taillard token-budget probe
 │   └── starjob_train_sm.jsonl      written by 01_download_data.py (~108k)
 │
 └── outputs/                        ← created during training

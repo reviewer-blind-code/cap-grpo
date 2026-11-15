@@ -1,4 +1,4 @@
-"""Step 13 — classical dispatching rules as a reference point.
+"""Step 12 — classical dispatching rules as a reference point.
 
 Five standard priority rules on the same instances, non-delay simulation. Every
 schedule a rule produces is valid by construction, which is the comparison that
@@ -9,7 +9,7 @@ matters: the models answer some of the instances, the rules answer all of them.
     LWKR  least work remaining
 
 Run:
-    python scripts/13_dispatching_rules.py --data /path/to/raw
+    python scripts/12_dispatching_rules.py --data /path/to/raw
 """
 import argparse
 import csv

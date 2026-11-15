@@ -60,6 +60,11 @@ a mask that drops over-long samples from the gradient, V8 a penalty for writing
 the same job too many times.
 
 Training logs for all eight are in `training_logs/`, named by these numbers.
+Inside each log the reward is still called by its mode name in the code, which
+is not the variant number: V1's log says `jssp_reward_uniform`, and V8's says
+`jssp_reward_hybrid_v7`, where the `v7` is that reward's old label and not
+variant V7. `docs/REPRODUCE.md` carries the full mapping between the three
+names each run has.
 
 ## Stage 1: the audit
 

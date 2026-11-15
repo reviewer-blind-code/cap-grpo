@@ -22,20 +22,38 @@ export JSSP_RAW=/path/to/JSSP-SLM-raw     # or pass --data to each script
 | Dispatching-rule reference | `python scripts/12_dispatching_rules.py` | MWKR 11.9 % over all 455 and never fails; models 9.6 to 12.4 % on 42 to 68 % of instances |
 | Hosted-model failures | `python scripts/13_frontier_failures.py` | GPT-4o 0 of 18, all constraint violations; o3 one-shot 12 of 18, the rest truncation |
 
-Model keys in the raw data map to the variant numbering as follows.
+Three names exist for the same run: the number used in the tables, the key
+written into the generation files, and the reward mode written into the
+training log. They are kept as they were produced, so this table is the way
+between them.
 
-| Key | Variant | Reward |
-|---|---|---|
-| `Base-LLaMA` | — | no fine-tuning |
-| `SFT-LoRA` | — | supervised, LoRA; the start of every RL run |
-| `Vbin` | V1 | feasibility only |
-| `VbinMk` | V2 | feasibility plus makespan |
-| `StratNoMk` | V3 | feasibility plus constraint penalty |
-| `V1` | V4 | stratified |
-| `V3` | V5 | stratified, matched hyperparameters |
-| `V6LoRA` | V6 | stratified plus length mask |
-| `V4` | V7 | hybrid, CAP-GRPO |
-| `V7` | V8 | hybrid plus over-emission penalty |
+| Variant | Key in the generations | Training-log folder | `rewards/…` key in `trainer_state.json` |
+|---|---|---|---|
+| — | `Base-LLaMA` | — | no fine-tuning |
+| — | `SFT-LoRA` | `sft_llama_lora` | supervised, no reward |
+| V1 feasibility only | `Vbin` | `V1_feasibility_only` | `jssp_reward_uniform` |
+| V2 feasibility plus makespan | `VbinMk` | `V2_feasibility_and_makespan` | `jssp_reward_binary_makespan` |
+| V3 feasibility plus penalty | `StratNoMk` | `V3_feasibility_and_penalty` | `jssp_reward_stratified_nomakespan` |
+| V4 stratified | `V1` | `V4_stratified` | `jssp_reward_stratified` |
+| V5 stratified, matched settings | `V3` | `V5_stratified_matched_settings` | `jssp_reward_stratified` |
+| V6 stratified plus length mask | `V6LoRA` | `V6_stratified_length_mask` | `jssp_reward_stratified` |
+| V7 hybrid, CAP-GRPO | `V4` | `V7_hybrid_cap_grpo` | `jssp_reward_hybrid` |
+| V8 hybrid plus over-emission | `V7` | `V8_hybrid_over_emission_penalty` | `jssp_reward_hybrid_v7` |
+| 2-1 random reward | `RANDL42`, `RANDL43` | `stage2/test_2_1_random_reward/seed42`, `/seed43` | `jssp_reward_random` |
+| 2-2 more supervised training | `SFTbudget5e6`, `SFTbudget2e4` | `stage2/test_2_2_more_supervised/lr5e-6`, `/lr2e-4` | supervised, no reward |
+| 2-3 rejection sampling | `RFT` | `stage2/test_2_3_rejection_sampling/run` | supervised, no reward |
+
+Three traps in that table, all of them from an earlier numbering that the
+tables no longer use:
+
+- The key `V1` in the generation files is variant **V4**, `V3` is **V5**, `V4`
+  is **V7** and `V7` is **V8**. The keys were frozen before the variants were
+  renumbered and were left alone so that stored files keep their meaning.
+- V8's reward mode is called `hybrid_v7` in the code and in its log. The `v7`
+  there is the old label of that reward, not variant V7.
+- V4, V5 and V6 share one reward key, `jssp_reward_stratified`, and that is
+  correct: V4 and V5 use the same reward with different training settings, and
+  V6 adds a mask on the gradient rather than a change to the reward.
 
 ## What the raw data does and does not contain
 

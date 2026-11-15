@@ -4,9 +4,57 @@ Fine-tune an LLM to solve the **Job-Shop Scheduling Problem (JSSP)** using
 **GRPO** (Shao et al., 2024), guided by a constraint-aware reward function
 (CAP) with a coverage gate that prevents reward hacking from vacuous outputs.
 
-## Results
+## The supervised stage
 
-Every figure below comes from one uniform evaluation grid: 11 models, 5
+Four base models were fine-tuned on the StarJob corpus, 108,000 schedules, one
+pass, LoRA throughout. LLaMA 3.1 8B came out ahead and is the start of
+everything after it.
+
+| Base model | Valid schedules |
+|---|---|
+| **LLaMA 3.1 8B** | **95.5 %** |
+| Ministral 8B | 93.0 % |
+| Granite 3.2 8B | 87.0 % |
+| Qwen2.5 7B | 1.0 % |
+
+Those scores are measured on the corpus's own held-out split, and that split is
+not clean: 198 of its 200 items also appear in the training data, because the
+split was drawn with a different random generator than the one that built the
+training set. The ranking of the four models still holds, but every number in
+that column is too high. On the benchmark grid used everywhere else in this
+README, the same LLaMA model reaches **43.3 %**.
+
+The checkpoint carried forward is step 9,800, chosen as the lowest evaluation
+loss of the run, 0.40401, measured on the corpus's own split. No benchmark
+instance took part in that choice. `training_logs/sft_llama_lora_checkpoint9800/`
+holds the evaluation loss at all 49 checkpoints.
+
+## The RL stage
+
+Eight reward designs were trained from that one checkpoint, each for 500 steps
+with K = 4 samples per prompt over the same 2,000 records. The designs differ
+in what the reward counts:
+
+| | Design | Feasible flag | Per-constraint penalty | Makespan term |
+|---|---|---|---|---|
+| V1 | Feasibility only | yes | no | no |
+| V2 | Feasibility plus makespan | yes | no | yes |
+| V3 | Feasibility plus penalty | yes | yes | no |
+| V4 | Stratified | yes | weighted | yes |
+| V5 | Stratified, matched settings | yes | weighted | yes |
+| V6 | Stratified plus length mask | yes | weighted | yes |
+| V7 | Hybrid, CAP-GRPO | yes | equal weights | yes |
+| V8 | Hybrid plus over-emission penalty | yes | equal weights | yes |
+
+V4 and V5 use the same reward and differ only in the training settings. V6 adds
+a mask that drops over-long samples from the gradient, V8 a penalty for writing
+the same job too many times.
+
+Training logs for all eight are in `training_logs/`, named by these numbers.
+
+## Stage 1: the audit
+
+Every number below comes from one uniform evaluation grid: 11 models, 5
 decoding seeds, 455 instances, 25,025 generations, temperature 0.1, vLLM,
 scored with `cap_grpo/checker.py`. Earlier versions of this table reported
 single-run numbers on 18 instances; those are superseded.

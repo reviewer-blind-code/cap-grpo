@@ -4,6 +4,15 @@ Fine-tune an LLM to solve the **Job-Shop Scheduling Problem (JSSP)** using
 **GRPO** (Shao et al., 2024), guided by a constraint-aware reward function
 (CAP) with a coverage gate that prevents reward hacking from vacuous outputs.
 
+Everything here was re-measured on one evaluation grid and then controlled
+against three alternatives. Two things came out of that, and they point in
+different directions. The reward improves the **quality** of the schedules the
+model gets right, by about one point of gap, and nothing else tried does that.
+The rise in how **often** the model writes a valid schedule is not specific to
+the reward: plain supervised training at the same budget raises it two to three
+times further. Both are reported below, in [Stage 1](#stage-1-the-audit) and
+[Stage 2](#stage-2-where-the-gain-comes-from).
+
 ## The supervised stage
 
 Four base models were fine-tuned on the StarJob corpus, 108,000 schedules, one
@@ -226,11 +235,30 @@ rules that differ are described in [docs/CHECKER.md](docs/CHECKER.md).
 
 ## Pipeline Overview
 
+Training, in four steps:
+
 ```
 01_download_data.py       download StarJob from HuggingFace + OOD from OR-Library
 02_run_sft.py             supervised fine-tuning (SFT) with Alpaca format
 03_run_grpo.py            CAP-GRPO reinforcement learning from SFT adapter
-04_eval_ood.py            evaluate on 18 OOD FT+LA benchmark instances
+04_eval_ood.py            a quick check on the 18 classic FT and LA instances
+```
+
+Analysis, reading the raw-data folder rather than running a model:
+
+```
+06_audit_checker.py       the checker against CP-SAT, and against mutations
+07_passk.py               pass@k from the stored samples
+08_solved_lost.py         which instances each model gains and loses
+09_best_of_k.py           best of k at equal inference cost
+10_retiming.py            how many invalid schedules a repair pass can save
+11_duration_scaling.py    what happens when durations are divided by ten
+12_gap_distribution.py    the gap distribution, not just its mean
+13_dispatching_rules.py   FIFO, SPT, LPT, MWKR and LWKR as a reference point
+14_frontier_failures.py   why the hosted models fail, counted by cause
+15_rl_effect.py           the paired effect of the RL stage over its SFT start
+16_stage2_controls.py     the three Stage 2 control tests
+as_run/                   the files that produced the runs on the GPU node
 ```
 
 ---
@@ -411,6 +439,12 @@ constraint checks (observed in early V2/V3 runs).
 
 ## Step 4 — Evaluation
 
+`04_eval_ood.py` is a quick check on 18 classic instances, useful while a run
+is still training. It is **not** the evaluation the results in this README come
+from: those use the uniform grid of 455 instances and 5 seeds described in
+[Stage 1](#stage-1-the-audit), produced by `scripts/as_run/run_grid.py` and
+analysed by `scripts/15_rl_effect.py` and `scripts/16_stage2_controls.py`.
+
 ```bash
 # OOD benchmarks (all 18 FT+LA instances)
 python scripts/04_eval_ood.py --model-path outputs/cap_grpo_v1/final_adapter
@@ -472,30 +506,46 @@ cap-grpo/
 │   ├── 01_download_data.py         step 1: download StarJob + OOD data
 │   ├── 02_run_sft.py               step 2: supervised fine-tuning
 │   ├── 03_run_grpo.py              step 3: CAP-GRPO reinforcement learning
-│   └── 04_eval_ood.py              step 4: OOD evaluation + debug inference
+│   ├── 04_eval_ood.py              step 4: quick check on 18 instances
+│   ├── 06_audit_checker.py … 16_stage2_controls.py
+│   │                               analysis, reading the raw-data folder
+│   └── as_run/                     the files as they ran on the GPU node
 │
 ├── cap_grpo/                       ← Python package
-│   ├── __init__.py
 │   ├── config.py                   all hyperparameters and paths
 │   ├── checker.py                  JSSP feasibility checker (no ML deps)
+│   ├── checker_legacy.py           the earlier checker, kept for comparison
 │   ├── reward.py                   CAP reward computation
 │   ├── dataset.py                  download, sample, and load data
+│   ├── rawdata.py                  find and read the raw-data folder
 │   ├── model.py                    Unsloth model loading
 │   ├── sft.py                      supervised fine-tuning
 │   ├── grpo.py                     CAP-GRPO training
 │   └── evaluator.py                generate + check + aggregate metrics
 │
-├── data/                           ← populated by 01_download_data.py
-│   ├── starjob_train_sm.jsonl      SM training set (~108k records)
-│   └── benchmarks/
-│       └── jobshop1.txt            OR-Library: FT + LA + other instances
+├── tests/
+│   └── test_checker.py             21 hand-built cases, one rule each
+│
+├── docs/
+│   ├── CHECKER.md                  the three rules the two checkers differ on
+│   └── REPRODUCE.md                every reported number and its command
+│
+├── training_logs/                  ← small enough for git
+│   ├── V1_feasibility_only/ … V8_hybrid_over_emission_penalty/
+│   ├── sft_llama_lora_checkpoint9800/   evaluation loss at 49 checkpoints
+│   ├── sft_llama_rslora/
+│   └── stage2/                     the five control runs
+│
+├── data/
+│   ├── instances/                  the problem sets, small enough for git
+│   └── starjob_train_sm.jsonl      written by 01_download_data.py (~108k)
 │
 └── outputs/                        ← created during training
-    ├── sft_llama/
-    │   └── final_adapter/
-    └── cap_grpo_llama_hybrid/
-        └── final_adapter/
+    ├── sft_llama/final_adapter/
+    └── cap_grpo_llama_hybrid/final_adapter/
 ```
+
+The generations themselves are in the Drive folder; see [Raw data](#raw-data).
 
 ---
 

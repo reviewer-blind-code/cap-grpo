@@ -80,11 +80,11 @@ supervised checkpoint it started from, using the same exact sign test as step
 
 The three tests, and what each one removes:
 
-| Test | What is taken away | Result |
-|---|---|---|
-| 2-1 | the information in the reward | 29.7 % and 30.4 % valid, against 43.3 % at the start |
-| 2-2 | the reward and the sampling, leaving plain supervised training | 58.2 % at lr 5e-6 and 69.5 % at lr 2e-4 |
-| 2-3 | the policy gradient, leaving the checker as a data filter | 43.1 %, where it started |
+| | Test | What is taken away | Result |
+|---|---|---|---|
+| **2-1** | random reward | the information in the reward | 29.7 % and 30.4 % valid, against 43.3 % at the start |
+| **2-2** | more supervised training | the reward and the sampling altogether | 58.2 % at lr 5e-6 and 69.5 % at lr 2e-4 |
+| **2-3** | rejection sampling | the policy gradient, leaving the checker as a filter | 43.1 %, where it started |
 
 Each had the same supervised checkpoint, the same 2,000 records and the same
 500 optimizer updates as one RL run, and 2-3 drew the same 8,000 completions.

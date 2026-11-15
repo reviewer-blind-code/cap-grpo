@@ -116,43 +116,53 @@ produced a valid schedule, equivalently the exact McNemar test.
 ## Stage 2: where the gain comes from
 
 The table above says the RL stage raises validity. It does not say why. Three
-controls each remove one possible cause, and each is given exactly what one RL
-run is given: the same supervised checkpoint, the same 2,000 records, 500
-optimizer updates, and where sampling is involved, the same 8,000 completions.
+controls each take one possible cause away:
+
+| | Test | What it takes away |
+|---|---|---|
+| **2-1** | random reward | the information in the reward: a draw from N(2.66, 1.93) that never reads the schedule, matched to the mean and spread of the real one |
+| **2-2** | more supervised training | the reward and the sampling altogether, leaving plain next-token training on the gold schedules |
+| **2-3** | rejection sampling | the policy gradient, leaving the checker as a filter on the model's own samples |
+
+Each is given exactly what one RL run is given: the same supervised checkpoint,
+the same 2,000 records, 500 optimizer updates, and where sampling is involved,
+the same 8,000 completions.
 
 | Model | Valid | Change | Wins / losses | p | Gap change on pairs both solve |
 |---|---|---|---|---|---|
-| More supervised training, lr 2e-4 (2-2) | **69.5 %** | +26.2 pp | 628 / 32 | 1.3e-144 | +0.06 pp |
-| More supervised training, lr 5e-6 (2-2) | **58.2 %** | +14.9 pp | 397 / 57 | 8.9e-64 | −0.52 pp |
+| **2-2** more supervised training, lr 2e-4 | **69.5 %** | +26.2 pp | 628 / 32 | 1.3e-144 | +0.06 pp |
+| **2-2** more supervised training, lr 5e-6 | **58.2 %** | +14.9 pp | 397 / 57 | 8.9e-64 | −0.52 pp |
 | Stratified, matched settings (V5) | 51.3 % | +8.0 pp | 258 / 75 | 1.2e-24 | **−1.12 pp** |
 | Hybrid, CAP-GRPO (V7) | 50.0 % | +6.7 pp | 230 / 78 | 1.5e-18 | **−1.24 pp** |
 | Supervised start | 43.3 % | — | — | — | — |
-| Rejection-sampling fine-tuning (2-3) | 43.1 % | −0.2 pp | 95 / 100 | 0.78 | +0.16 pp |
-| Uninformative reward, seed 42 (2-1) | 29.7 % | −13.6 pp | 19 / 328 | 6.8e-74 | +1.08 pp |
-| Uninformative reward, seed 43 (2-1) | 30.4 % | −12.9 pp | 61 / 355 | 1.6e-51 | +3.53 pp |
+| **2-3** rejection sampling | 43.1 % | −0.2 pp | 95 / 100 | 0.78 | +0.16 pp |
+| **2-1** random reward, seed 42 | 29.7 % | −13.6 pp | 19 / 328 | 6.8e-74 | +1.08 pp |
+| **2-1** random reward, seed 43 | 30.4 % | −12.9 pp | 61 / 355 | 1.6e-51 | +3.53 pp |
 
-Three things follow.
+Three things follow, one from each test.
 
-- **The training loop alone does not do it.** With the reward replaced by a
-  random draw of the same mean and spread, validity falls by about thirteen
-  points. The reward has to read the schedule.
-- **The rise in validity is not what the reward designs achieve.** Plain
+- **2-1: the training loop alone does not do it.** With the reward replaced by
+  a random draw of the same mean and spread, validity falls by about thirteen
+  points on both seeds. The reward has to read the schedule.
+- **2-2: the rise in validity is not what the reward designs achieve.** Plain
   supervised training at the same budget raises it two to three times further.
   It gets there by finishing the answer: the share cut off at the token limit
   falls from 10.6 % to 2.9 %, and the share that finishes but breaks a rule
   from 46.1 % to 27.6 %. The lr 2e-4 run matches the number of updates, not the
   size of each step; the matched run is lr 5e-6, and it still gains +14.9 pp.
-- **What the reward does achieve is quality.** On the problems a pair of models
-  both solve, only the reward runs move the gap, by about one point. Neither
-  supervised control does, and neither does rejection sampling.
+- **2-3: using the checker as a filter is not enough.** It lands where it
+  started, because the filter had almost nothing to remove: 7,312 of its 8,000
+  samples were already valid.
 
-Test 2-3 lands where it started because its filter had almost nothing to
-remove: 7,312 of its 8,000 samples were already valid.
+What the reward does achieve is **quality**. On the problems a pair of models
+both solve, only the reward runs move the gap, by about one point. None of the
+three controls does.
 
 A fourth test, a stronger supervised stage and a second base model, has not
 been run.
 
-`python scripts/16_stage2_controls.py` recomputes every number in this table.
+`python scripts/16_stage2_controls.py` recomputes every number in this table,
+and the raw folder keeps one directory per test under `05_stage2_tests/`.
 
 ## Raw data
 

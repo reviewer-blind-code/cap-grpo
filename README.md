@@ -111,8 +111,9 @@ produced a valid schedule, equivalently the exact McNemar test.
   schedule, the median change in gap is 0.00 pp for every variant, and the mean
   never moves more than 1.24 points either way.
 - **Sampling efficiency, mostly.** With 64 samples the supervised model reaches
-  100 % on known shapes too; one RL sample is worth three to four supervised
-  samples.
+  100 % on known shapes too. On those shapes one RL sample buys what two to
+  three supervised samples buy: the reward runs solve 83.7 to 84.0 % at one
+  sample, and the supervised model is at 82.1 % with two and 87.1 % with four.
 - **No new capability.** Long durations and Taillard stay at zero for every
   variant, every budget and every prompt.
 - **A reference point.** The MWKR dispatching rule reaches 11.9 % mean gap over

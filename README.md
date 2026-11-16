@@ -95,6 +95,31 @@ print; it is a leftover from an earlier comparison and nothing in this work uses
 it. The test is a two-sided exact sign test on the pairs where exactly one model
 produced a valid schedule, equivalently the exact McNemar test.
 
+### What the zero in the first table measures
+
+Without fine-tuning the model scores 0 % valid, and that number is easy to
+misread. On the 35 classic instances, zero-shot, **not one of its 175 answers
+contained a single parseable operation**: the five constraint counters are all
+zero because there was never a schedule to check. The zero measured the output
+format, not the ability to schedule.
+
+One worked 2×2 example in the prompt separates the two.
+
+| On 35 classic instances, 5 seeds | Zero-shot | One worked example |
+|---|---|---|
+| Valid schedules | 0 / 175 | 0 / 175 |
+| Answers with no parseable operation | 100 % | 61.1 % |
+| Machine conflicts per answer | 0.0 | 47.1 |
+| Precedence violations per answer | 0.0 | 28.1 |
+| Routing violations per answer | 0.0 | 14.9 |
+| Operations missing per answer | 87.5 | 69.0 |
+
+Four answers in ten now parse, and every constraint counter lights up at once.
+The closest answer of the 175 breaks 46 constraints. So the base model copies
+the shape of a schedule from one example and cannot build one; what the
+supervised stage adds is not the format but schedules that respect the
+constraints.
+
 ### By benchmark family, valid % and mean gap
 
 | Family | n | Supervised (LoRA) | CAP-GRPO (V7) | Over-emission (V8) |
@@ -194,7 +219,8 @@ JSSP-SLM-raw/
       passk/               57,600 samples, twice: verdicts as reported, and a
                            repeat that kept the text
       sm_heldout/          9,000 answers on 225 held-out StarJob problems
-      probes/              duration scaling, token budget, prompt sensitivity
+      probes/              duration scaling, token budget, prompt sensitivity,
+                           the base model with one worked example
       hosted_models/       stored answers of the hosted models
   05_stage2_tests/         one folder per control test, logs next to answers
   06_earlier_runs/         earlier evaluation output, kept for the record

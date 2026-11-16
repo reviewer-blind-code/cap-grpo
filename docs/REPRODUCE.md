@@ -83,6 +83,22 @@ runs the same file records the evaluation loss at 49 checkpoints and the
 selected checkpoint: step 9,800, evaluation loss 0.40401, the lowest of the
 run. No benchmark instance took part in that choice.
 
+## The base model with one worked example
+
+`04_stage1_evaluation/probes/base_one_shot/` holds 175 answers: the model with
+no fine-tuning, on the 35 classic instances, 5 seeds, with one solved 2×2
+instance placed before the question.
+
+```bash
+python evaluation/run_grid.py --models Base --seeds 0 1 2 3 4 \
+    --sets classic --prompt-style alpaca_1shot --out grid_base_1shot
+```
+
+Zero-shot, none of those 175 answers contains a parseable operation. With the
+example, 38.9 % of them do, and the constraint counters rise from zero to 47.1
+machine conflicts and 28.1 precedence violations per answer. Still nothing
+valid, and the closest answer breaks 46 constraints.
+
 ## Stage 2, the control tests
 
 `scripts/15_stage2_controls.py` recomputes every number in the Stage 2 section

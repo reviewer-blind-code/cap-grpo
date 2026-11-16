@@ -74,10 +74,11 @@ supervised runs, and `stage2/` for the control tests.
 
 `training_logs/<run>/trainer_state.json` holds reward, reward_std, KL, loss,
 grad_norm and completion_length at every logging step, and
-`training_logs/<run>/training.log` the full console output. One exception:
-`V3_feasibility_and_penalty` has `trainer_state_from_log.json` instead, rebuilt
-from its console log because that run's checkpoints were pruned when the
-results were imported. It carries the same 100 logged steps. For the supervised
+`training_logs/<run>/training.log` the full console output. One note on
+`V3_feasibility_and_penalty`: its checkpoints were deleted when the results were
+imported, so its `trainer_state.json` was rebuilt from the console log beside
+it. The file carries the same 100 logged steps as every other run and says so
+in its own `reconstructed_from` field. For the supervised
 runs the same file records the evaluation loss at 49 checkpoints and the
 selected checkpoint: step 9,800, evaluation loss 0.40401, the lowest of the
 run. No benchmark instance took part in that choice.

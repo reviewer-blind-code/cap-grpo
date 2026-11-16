@@ -175,7 +175,7 @@ and the raw folder keeps one directory per test under `05_stage2_tests/`.
 ## Raw data
 
 The generations are too large for git. They live in a Google Drive folder,
-503 MB, 167 files:
+507 MB, 171 files:
 
 **https://drive.google.com/drive/folders/11bDSEA9ir1Pib3tmwzl87SV6ovgVbSrl**
 
@@ -184,6 +184,9 @@ JSSP-SLM-raw/
   00_README.md, 00_SHA256SUMS
   01_instances/            every problem set, one JSON object per line
   02_sft_stage/            how each base model was trained, and its console log
+                           (`base_models/run_rslora.log` is the LLaMA rsLoRA run;
+                           the LoRA run's own console log was not kept, only its
+                           trainer_state.json, which is in this repository)
   03_rl_stage/             the eight reward designs, training logs
   04_stage1_evaluation/    one protocol for every model
       main_grid/           25,025 answers, full text, 11 models x 5 seeds x 455

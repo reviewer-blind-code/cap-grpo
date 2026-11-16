@@ -13,6 +13,11 @@ The mutations are: delete an operation, duplicate one, break the arithmetic of
 one, overlap two operations on a machine, and move one operation to the wrong
 machine.
 
+The 18 instances come from OR-Library, not from the raw-data folder, so fetch
+them once first:
+
+    python scripts/01_download_data.py --skip-starjob
+
 Run:
     python scripts/05_audit_checker.py                      # FT+LA, 18 instances
     python scripts/05_audit_checker.py --limit 30           # 30 s per instance

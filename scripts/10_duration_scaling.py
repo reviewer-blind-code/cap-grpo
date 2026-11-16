@@ -29,13 +29,14 @@ def main():
     root = data_root(args.data)
 
     rows = []
-    for f in sorted((root / "probes").glob("scale_k8*/samples.jsonl")):
+    for f in sorted((root / "04_stage1_evaluation" / "probes").glob("scale_k8*/samples.jsonl")):
         rows += read_jsonl(f)
     if not rows:
-        raise SystemExit("no scale samples under <data>/probes/scale_k8*/")
+        raise SystemExit("no scale samples under "
+                         "<data>/04_stage1_evaluation/probes/scale_k8*/")
 
     max_dur = {}
-    for r in read_jsonl(root / "instances" / "scale_90.jsonl"):
+    for r in read_jsonl(root / "01_instances" / "scale_90.jsonl"):
         max_dur[r["group"]] = max(max_dur.get(r["group"], 0),
                                   max(int(d) for job in r["jobs"] for _, d in job))
 

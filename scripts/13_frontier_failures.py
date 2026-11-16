@@ -33,9 +33,10 @@ def main():
     args = ap.parse_args()
     root = data_root(args.data)
 
-    files = sorted((root / "frontier").glob("metrics_*.json"))
+    files = sorted((root / "04_stage1_evaluation" / "hosted_models").glob("metrics_*.json"))
     if not files:
-        raise SystemExit("no hosted-model results under <data>/frontier/")
+        raise SystemExit("no hosted-model results under "
+                         "<data>/04_stage1_evaluation/hosted_models/")
 
     summary = []
     for path in files:

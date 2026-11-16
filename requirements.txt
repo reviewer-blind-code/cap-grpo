@@ -12,3 +12,6 @@ bitsandbytes
 sentencepiece
 huggingface_hub
 requests
+
+# analysis only: the CP-SAT audit of the checker (scripts/05_audit_checker.py)
+ortools

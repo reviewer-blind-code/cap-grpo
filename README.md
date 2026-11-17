@@ -718,21 +718,14 @@ r = compute_reward(v, n_ops=30, bks=55, mode="hybrid")
 | LA | Lawrence (1984) — la01–la10, la16–la20 | 15 | OOD eval |
 | ORB | Applegate & Cook (1991) — orb01–orb10, all 10×10 | 10 | Extended OOD eval |
 
-The 2% test split (seed=42) is held out from **both** SFT and GRPO training.
 The 18 OOD FT+LA instances are never used for training.
 
-## References
-
-- Abgaryan, H., Cazenave, T., & Harutyunyan, A. (2025). StarJob: Dataset for LLM-Driven Job Shop Scheduling. *arXiv preprint arXiv:2503.01877*.
-- Shao, Z., et al. (2024). DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models. *arXiv preprint arXiv:2402.03300*.
-- Hu, E. J., et al. (2021). LoRA: Low-Rank Adaptation of Large Language Models. *arXiv preprint arXiv:2106.09685*.
-- Kalajdzievski, D. (2023). A Rank Stabilization Scaling Factor for Fine-Tuning with LoRA. *arXiv preprint arXiv:2312.03732*.
-- Grattafiori, A., et al. (2024). The Llama 3 Herd of Models. *arXiv preprint arXiv:2407.21783*.
-- Fisher, H., & Thompson, G. L. (1963). Probabilistic Learning Combinations of Local Job-Shop Scheduling Rules. *Industrial Scheduling*, 225–251.
-- Lawrence, S. (1984). *Resource Constrained Project Scheduling: An Experimental Investigation of Heuristic Scheduling Techniques*. Carnegie-Mellon University.
-- Applegate, D., & Cook, W. (1991). A Computational Study of the Job-Shop Scheduling Problem. *ORSA Journal on Computing*, 3(2), 149–156.
-
----
+The 2 % StarJob split was intended to be held out from both SFT and GRPO
+training, and it is not: 198 of its 200 items also appear in the training data,
+because the split was drawn with a different random generator than the one that
+built the training set. See **The supervised stage** above. Every benchmark
+result in this README is measured on the instance grid, which has no overlap
+with any training data.
 
 ## License
 

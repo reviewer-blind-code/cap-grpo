@@ -128,3 +128,32 @@ Each had the same supervised checkpoint, the same 2,000 records and the same
 copied without change. They are written against the private training
 repository's module layout and will not run here; they are included because the
 exact code behind a number is part of the record.
+
+## Step 17 — The starting checkpoint
+
+```bash
+python scripts/16_checkpoint_selection.py
+```
+
+It reads `04_stage1_evaluation/main_grid/results.jsonl` for the checkpoint every
+model started from, step 9,800, and `07_checkpoint_selection/results.jsonl` for
+the final checkpoint of the same epoch, step 14,406, then compares them cell by
+cell with the same exact sign test used in steps 15 and 16.
+
+Expected output:
+
+```
+paired cells                 2275
+valid, step 9,800            43.30 %
+valid, step 14,406           47.74 %  (+4.44 pp)
+  wins / losses              180 / 79   p = 3.11e-10
+gap, cells both solve        906
+  mean paired difference     -1.59 pp
+  better / worse             405 / 232   p = 7.06e-12
+cut off at the token limit, step 9,800  10.6 %
+cut off at the token limit, step 14,406 9.4 %
+```
+
+The two checkpoints differ in evaluation loss by 0.0022, which is why this
+comparison exists: the loss had stopped separating them long before their
+behaviour had. `scripts/as_run/_grid_full.sh` is the launcher as it ran.

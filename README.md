@@ -34,9 +34,16 @@ that column is too high. On the benchmark grid used everywhere else in this
 README, the same LLaMA model reaches **43.3 %**.
 
 The checkpoint carried forward is step 9,800, chosen as the lowest evaluation
-loss of the run, 0.40401, measured on the corpus's own split. No benchmark
-instance took part in that choice. `training_logs/sft_llama_lora/`
-holds the evaluation loss at all 49 checkpoints.
+loss available at the time, 0.40401, measured on the corpus's own split. No
+benchmark instance took part in that choice.
+
+The epoch itself ran to completion at step 14,406. Over the remaining 4,606
+steps the evaluation loss falls by 0.0022, to 0.40178, which is the minimum of
+the run; 72 % of the whole decrease had already happened by step 2,000. That
+selection is revisited below, under **The starting checkpoint**, because the
+loss turns out to be a poor guide to it. `training_logs/sft_llama_lora/` holds
+both states: `trainer_state.json` at the checkpoint used, 49 evaluation points,
+and `trainer_state_epoch_end.json` for the whole epoch, 73 points.
 
 ## The RL stage
 
@@ -198,10 +205,47 @@ been run.
 `python scripts/15_stage2_controls.py` recomputes every number in this table,
 and the raw folder keeps one directory per test under `05_stage2_tests/`.
 
+## The starting checkpoint
+
+Test 2-2 raised validity by 26.2 points while the held-out loss stayed where it
+was, 0.3078 before and 0.3077 after. That is a reason to doubt the measurement
+used to pick the starting checkpoint, since the same measurement had been flat
+across the 4,606 steps that follow step 9,800. All 49 checkpoints from step
+4,800 onward were kept, so the question could be answered by evaluation rather
+than by training: the final checkpoint of the epoch was run on the same grid as
+every other model, 455 problems and five seeds.
+
+| Starting checkpoint | Valid | Wins / losses | p | Gap change on pairs both solve | p |
+|---|---|---|---|---|---|
+| step 9,800, selected on loss | 43.30 % | — | — | — | — |
+| **step 14,406, end of the epoch** | **47.74 %** | 180 / 79 | 3.1e-10 | **−1.59 pp** | 7.1e-12 |
+
+The two checkpoints differ in evaluation loss by 0.0022. The later one gives
++4.44 points of validity and a paired gap improvement of 1.59 points, computed
+the same way as the reward comparisons above, where the best reward design
+moved the gap by 1.24 from the same starting point. Answers cut off at the
+token limit fall from 10.6 % to 9.4 %.
+
+Both figures are measured from step 9,800, so they do not show that the
+checkpoint move substitutes for the reward run; that requires running the
+reward design on top of step 14,406, which has not been done. Test 2-2
+indicates otherwise, since it raised validity by 26.2 points while moving the
+gap by +0.06. What the result does change is the attribution: checkpoint
+selection on loss affects every comparison reported here, so the 1.24 cannot be
+assigned in full to reinforcement learning until it is measured from the best
+available starting point.
+
+The next step is the same evaluation across the other 48 retained checkpoints,
+selection of a starting point on validity rather than loss, and the reward run
+repeated from that point.
+
+`python scripts/16_checkpoint_selection.py` recomputes every number in this
+section from `07_checkpoint_selection/` in the raw folder.
+
 ## Raw data
 
 The generations are too large for git. They live in a Google Drive folder,
-507 MB, 171 files:
+514 MB, 177 files:
 
 **https://drive.google.com/drive/folders/11bDSEA9ir1Pib3tmwzl87SV6ovgVbSrl**
 
@@ -224,6 +268,8 @@ JSSP-SLM-raw/
       hosted_models/       stored answers of the hosted models
   05_stage2_tests/         one folder per control test, logs next to answers
   06_earlier_runs/         earlier evaluation output, kept for the record
+  07_checkpoint_selection/ the completed epoch's final checkpoint on the main
+                           grid, with its console log
 ```
 
 The training logs are small, so they are in this repository under
@@ -238,6 +284,7 @@ Point the scripts at the raw folder once:
 export JSSP_RAW=/path/to/JSSP-SLM-raw
 python scripts/14_rl_effect.py
 python scripts/15_stage2_controls.py
+python scripts/16_checkpoint_selection.py
 ```
 
 `docs/REPRODUCE.md` maps every reported number to the command that prints it.

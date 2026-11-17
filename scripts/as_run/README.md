@@ -15,6 +15,7 @@ record.
 | `run_passk.py` | the pass@k run, with `--store-text` added for the repeat |
 | `_stage2a.sh` | the launcher for tests 2-2 and 2-3 and their evaluation |
 | `_rerun21.sh` | the launcher for the repeat of test 2-1 |
+| `_grid_full.sh` | the launcher that evaluated the epoch's final checkpoint |
 
-`scripts/16_stage2_controls.py` recomputes every Stage 2 number in the README
+`scripts/15_stage2_controls.py` recomputes every Stage 2 number in the README
 from the raw data folder, and that one does run here.
